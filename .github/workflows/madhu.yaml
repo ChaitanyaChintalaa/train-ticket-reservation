@@ -82,19 +82,7 @@ jobs:
           sed -i "s|<IMAGE>|$ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}|g" task-definition.json
           cat task-definition.json > new-task.json
 
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: new-task.json
-          service: ${{ secrets.ECS_SERVICE }}
-          cluster: ${{ secrets.ECS_CLUSTER }}
-          wait-for-service-stability: true
-      - name: Install kubectl
-        run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-
+      
     # 7. Update kubeconfig for EKS
       - name: Update kubeconfig
         run: |
@@ -106,7 +94,7 @@ jobs:
       - name: Apply namespace manifest
         run: |
           kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/deployment.yaml -n ${{ secrets.K8S_NAMESPACE }}
+          
           kubectl apply -f k8s/service.yaml
 
     # 8. Deploy to EKS
